@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 
 from app.database.db import Base
 
+
 class ToDo(Base):
     __tablename__ = "todos"
 
