@@ -74,12 +74,14 @@ class User(Base):
 
         return current
 
+    @classmethod
     def delete(cls, db: Session, user):
         db.delete(user)
         db.commit()
 
         return user
 
+    @classmethod
     def delete_by_id(cls, db: Session, id: int):
         user = cls.get_by_id(db, id)
         db.delete(user)

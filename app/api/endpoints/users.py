@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from pydantic import EmailStr
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -21,6 +21,11 @@ def create_user(
     db: Session = Depends(dependencies.get_db),
     user_in: schemas.UserCreate,
 ):
+    """
+    Open endpoint to creat a new user. No need to be
+    logged in, anyone can create a user and then log
+    in as that user to perform more actions.
+    """
     user = models.User.get_by_email(db, user_in.email)
     if user:
         raise HTTPException(
@@ -29,7 +34,7 @@ def create_user(
         )
 
     user = models.User.create(db, user_in)
-    return user
+    return jsonable_encoder(user)
 
 
 @router.get(
@@ -44,7 +49,7 @@ def read_users(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=0),
 ):
-    return models.User.get_multiple(db, offset=offset, limit=limit)
+    return jsonable_encoder(models.User.get_multiple(db, offset=offset, limit=limit))
 
 
 @router.get(
@@ -61,7 +66,7 @@ def read_user_me(
     Get the user currently logged in.
     """
 
-    return current_user
+    return jsonable_encoder(current_user)
 
 
 @router.get(
@@ -82,7 +87,7 @@ def read_user_by_id(
             detail="User not found",
         )
 
-    return user
+    return jsonable_encoder(user)
 
 
 @router.put(
@@ -97,7 +102,7 @@ def update_user_me(
     current_user: models.User = Depends(dependencies.get_current_active_user),
 ):
     updated_user = models.User.update(db, current=current_user, new=update_data)
-    return updated_user
+    return jsonable_encoder(updated_user)
 
 
 @router.put(
@@ -121,7 +126,7 @@ def update_user_by_id(
 
     user = models.User.update(db, current=user, new=update_data)
 
-    return user
+    return jsonable_encoder(user)
 
 
 @router.delete(
