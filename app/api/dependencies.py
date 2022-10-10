@@ -10,7 +10,7 @@ from app.core import security
 from app.database.db import SessionLocal
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login/token")
 
 def get_db():
     """
