@@ -4,12 +4,22 @@ from pydantic import BaseModel, EmailStr
 class UserBase(BaseModel):
     email: EmailStr
     full_name: str | None = None
-    is_active: bool = True
 
 
 # properties to receive when creating a user
 class UserCreate(UserBase):
     password: str
+
+# properties to use to update a user (all optional)
+class UserUpdate(UserBase):
+    email: EmailStr | None = None
+    password: str | None = None
+
+
+# properties to return from APIs
+class User(UserBase):
+    id: int
+    is_active: bool = True
 
 
 # properties stored in the DB

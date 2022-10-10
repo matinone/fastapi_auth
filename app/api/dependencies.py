@@ -19,7 +19,7 @@ def get_db():
     there is an exception.
     """
     try:
-        db = SessionLocal
+        db = SessionLocal()
         yield db
     finally:
         db.close()
