@@ -9,6 +9,30 @@ from app.api import dependencies
 router = APIRouter(prefix="/todos", tags=["todos"])
 
 
+def get_todo_from_id(
+    todo_id: int,
+    db: Session = Depends(dependencies.get_db),
+    current_user: models.User = Depends(dependencies.get_current_active_user)
+):
+    """
+    Common dependency to check that the ToDo item exists and
+    that the current user has access to it.
+    """
+    todo = models.ToDo.get_by_id(db, id=todo_id)
+    if not todo:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="ToDo not found",
+        )
+    if todo.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="ToDo does not belong to current user",
+        )
+
+    return todo
+
+
 @router.post(
     "/",
     response_model=schemas.ToDoCreate,
@@ -48,16 +72,8 @@ def read_todos(
     response_description="The ToDo with the specified ID",
 )
 def read_todo_by_id(
-    todo_id: int,
-    db: Session = Depends(dependencies.get_db),
-    current_user: models.User = Depends(dependencies.get_current_active_user),
+    todo: models.ToDo = Depends(get_todo_from_id),
 ):
-    todo = models.ToDo.get_by_id(db, id=todo_id)
-    if not todo:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="ToDo not found",
-        )
 
     return todo
 
@@ -69,25 +85,11 @@ def read_todo_by_id(
     response_description="The updated ToDo with the specified ID",
 )
 def update_todo_by_id(
-    todo_id: int,
     update_data: schemas.ToDoUpdate,
+    todo: models.ToDo = Depends(get_todo_from_id),
     db: Session = Depends(dependencies.get_db),
-    current_user: models.User = Depends(dependencies.get_current_active_user),
 ):
-    todo = models.ToDo.get_by_id(db, id=todo_id)
-    if not todo:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="ToDo not found",
-        )
-    if todo.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="ToDo does not belong to current user",
-        )
-
     todo = models.ToDo.update(db, current=todo, new=update_data)
-
     return todo
 
 
@@ -97,21 +99,8 @@ def update_todo_by_id(
     summary="Delete a specific ToDo by ID",
 )
 def delete_todo_by_id(
-    todo_id: int,
+    todo: models.ToDo = Depends(get_todo_from_id),
     db: Session = Depends(dependencies.get_db),
-    current_user: models.User = Depends(dependencies.get_current_active_user),
 ):
-    todo = models.ToDo.get_by_id(db, id=todo_id)
-    if not todo:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="ToDo not found",
-        )
-    if todo.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="ToDo does not belong to current user",
-        )
-
     models.ToDo.delete(db, todo)
     # the body will be empty when using status code 204
