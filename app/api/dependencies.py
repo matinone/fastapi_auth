@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from jose import jwt, JWTError, ExpiredSignatureError
 
 from app import models, schemas
-from app.core import security
+from app.core.config import Settings, get_settings
 from app.database.db import SessionLocal
 
 
@@ -27,14 +27,15 @@ def get_db():
 
 def get_current_user(
     db: Session = Depends(get_db),
-    token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme),
+    settings: Settings = Depends(get_settings),
 ) -> models.User:
     """
     Dependency to get the current user from the provided token.
     """
     try:
         payload = jwt.decode(
-            token, security.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
         )
         # raises ValidationError if the payload is not valid
         token_data = schemas.TokenPayload(**payload)

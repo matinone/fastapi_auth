@@ -2,11 +2,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# initially just use SQLite
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
+from app.core.config import get_settings
+
+settings = get_settings()
+
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    settings.SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 )
 
 # each instance of SessionLocal will be a database session
