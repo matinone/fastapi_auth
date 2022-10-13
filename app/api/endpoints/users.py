@@ -148,7 +148,7 @@ def delete_user_me(
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a specific user by ID",
 )
-def update_user_by_id(
+def delete_user_by_id(
     user_id: int,
     db: Session = Depends(dependencies.get_db),
     current_user: models.User = Depends(dependencies.get_current_active_user),
