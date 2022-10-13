@@ -34,7 +34,7 @@ def create_user(
         )
 
     user = models.User.create(db, user_in)
-    return jsonable_encoder(user)
+    return user
 
 
 @router.get(
@@ -49,7 +49,7 @@ def read_users(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=0),
 ):
-    return jsonable_encoder(models.User.get_multiple(db, offset=offset, limit=limit))
+    return models.User.get_multiple(db, offset=offset, limit=limit)
 
 
 @router.get(
@@ -66,7 +66,7 @@ def read_user_me(
     Get the user currently logged in.
     """
 
-    return jsonable_encoder(current_user)
+    return current_user
 
 
 @router.get(
@@ -87,7 +87,7 @@ def read_user_by_id(
             detail="User not found",
         )
 
-    return jsonable_encoder(user)
+    return user
 
 
 @router.put(
@@ -102,7 +102,7 @@ def update_user_me(
     current_user: models.User = Depends(dependencies.get_current_active_user),
 ):
     updated_user = models.User.update(db, current=current_user, new=update_data)
-    return jsonable_encoder(updated_user)
+    return updated_user
 
 
 @router.put(
@@ -126,7 +126,7 @@ def update_user_by_id(
 
     user = models.User.update(db, current=user, new=update_data)
 
-    return jsonable_encoder(user)
+    return user
 
 
 @router.delete(

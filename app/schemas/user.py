@@ -21,11 +21,5 @@ class User(UserBase):
     id: int
     is_active: bool = True
 
-
-# properties stored in the DB
-class UserInDB(UserBase):
-    id: int
-    hashed_password: str
-
     class Config:
         orm_mode = True
