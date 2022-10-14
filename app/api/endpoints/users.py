@@ -10,7 +10,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post(
-    "/",
+    "",
     response_model=schemas.User,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new user",
@@ -38,7 +38,7 @@ def create_user(
 
 
 @router.get(
-    "/",
+    "",
     response_model=list[schemas.User],
     summary="Get a range of users",
     response_description="List of users",

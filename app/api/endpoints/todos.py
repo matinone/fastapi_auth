@@ -34,7 +34,7 @@ def get_todo_from_id(
 
 
 @router.post(
-    "/",
+    "",
     response_model=schemas.ToDoCreate,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new ToDo",
@@ -51,7 +51,7 @@ def create_todo(
 
 
 @router.get(
-    "/",
+    "",
     response_model=list[schemas.ToDoOut],
     summary="Get a range of todos for the current user",
     response_description="List of todos",
