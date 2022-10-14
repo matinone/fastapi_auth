@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from app.main import app
 from app.database.db import Base, create_engine_and_session
 from app.api.dependencies import get_db
-
+from app.core.security import create_access_token
+from app.models import User
 from app.tests.factories import UserFactory
 
 test_engine, TestSessionLocal = create_engine_and_session(
@@ -58,3 +59,16 @@ def client(db_session) -> TestClient:
         yield c
 
     # del app.dependency_overrides[get_db]
+
+
+@pytest.fixture(scope="function")
+def auth_headers(db_session) -> tuple[dict[str, str], User]:
+    """
+    Fixture to get valid authentication headers for a random user.
+    """
+    user = UserFactory(email="user@example.com")
+    auth_token = create_access_token(subject=user.id)
+
+    headers = {"Authorization": f"Bearer {auth_token}"}
+    # return the user as well, in case the test needs it
+    return headers, user
