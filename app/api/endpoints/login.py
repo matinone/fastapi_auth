@@ -25,10 +25,13 @@ def get_access_token(
     Get an OAuth2 access token to use in future requests as an
     authenticated user.
     """
-    user = models.User.authenticate(db, email=form_data.username, password=form_data.password)
+    user = models.User.authenticate(
+        db, email=form_data.username, password=form_data.password
+    )
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect email or password"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect email or password",
         )
     elif not user.is_active:
         raise HTTPException(

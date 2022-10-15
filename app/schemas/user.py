@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 
+
 # common properties
 class UserBase(BaseModel):
     email: EmailStr
@@ -9,6 +10,7 @@ class UserBase(BaseModel):
 # properties to receive when creating a user
 class UserCreate(UserBase):
     password: str
+
 
 # properties to use to update a user (all optional)
 class UserUpdate(UserBase):

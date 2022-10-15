@@ -10,12 +10,15 @@ from app.tests.factories import UserFactory
 
 def test_create_user(client: TestClient, db_session: Session):
 
-    data = {"email": "user@example.com",
-            "password": "123456",
-            "full_name": "Random Name"}
+    data = {
+        "email": "user@example.com",
+        "password": "123456",
+        "full_name": "Random Name",
+    }
 
     response = client.post(
-        "/api/users", json=data,
+        "/api/users",
+        json=data,
     )
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -58,9 +61,11 @@ def test_get_user_me(client: TestClient, auth_headers: tuple[dict[str, str], Use
     assert current_user["is_active"]
 
 
-@pytest.mark.parametrize('found', [True, False], ids=['user_found', 'user_not_found'])
+@pytest.mark.parametrize("found", [True, False], ids=["user_found", "user_not_found"])
 def test_get_user_by_id(
-    client: TestClient, auth_headers: tuple[dict[str, str], User], found,
+    client: TestClient,
+    auth_headers: tuple[dict[str, str], User],
+    found,
 ):
     headers, user = auth_headers
     user_id = user.id if found else "123456789"
@@ -117,10 +122,12 @@ def test_update_user_me(
     assert db_user.full_name == update_data["full_name"]
 
 
-@pytest.mark.parametrize('found', [True, False], ids=['user_found', 'user_not_found'])
+@pytest.mark.parametrize("found", [True, False], ids=["user_found", "user_not_found"])
 def test_update_user_by_id(
-    client: TestClient, db_session: Session,
-    auth_headers: tuple[dict[str, str], User], found,
+    client: TestClient,
+    db_session: Session,
+    auth_headers: tuple[dict[str, str], User],
+    found,
 ):
     headers, user = auth_headers
     user_id = user.id if found else "123456789"
@@ -153,10 +160,12 @@ def test_delete_user_me(
     assert not db_user
 
 
-@pytest.mark.parametrize('found', [True, False], ids=['user_found', 'user_not_found'])
+@pytest.mark.parametrize("found", [True, False], ids=["user_found", "user_not_found"])
 def test_delete_user_by_id(
-    client: TestClient, db_session: Session,
-    auth_headers: tuple[dict[str, str], User], found,
+    client: TestClient,
+    db_session: Session,
+    auth_headers: tuple[dict[str, str], User],
+    found,
 ):
     headers, user = auth_headers
     user_id = user.id if found else "123456789"

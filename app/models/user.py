@@ -1,7 +1,7 @@
 from typing import Any
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.orm import relationship, Session
 
 from app.database.db import Base
@@ -19,7 +19,6 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
     todos = relationship("ToDo", back_populates="user")
-
 
     @classmethod
     def create(cls, db: Session, user_data: UserCreate):
@@ -47,8 +46,11 @@ class User(Base):
         return db.query(cls).filter(cls.email == email).first()
 
     @classmethod
-    def update(cls, db: Session,
-        current, new: UserUpdate | dict[str, Any],
+    def update(
+        cls,
+        db: Session,
+        current,
+        new: UserUpdate | dict[str, Any],
     ):
         if isinstance(new, dict):
             update_data = new
@@ -58,9 +60,7 @@ class User(Base):
 
         # store the hashed password if it is updated
         if "password" in update_data:
-            update_data["hashed_password"] = get_password_hash(
-                update_data["password"]
-            )
+            update_data["hashed_password"] = get_password_hash(update_data["password"])
             update_data.pop("password")
 
         current_data = jsonable_encoder(current)

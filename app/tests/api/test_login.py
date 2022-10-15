@@ -8,7 +8,8 @@ from app.models import User
 
 
 def test_get_token_valid(
-    client: TestClient, db_session: Session,
+    client: TestClient,
+    db_session: Session,
 ):
     user_data = {"email": "test@test.com", "password": "123456"}
 
@@ -27,7 +28,9 @@ def test_get_token_valid(
 
 @pytest.mark.parametrize("cases", ["incorrect", "inactive"])
 def test_get_token_invalid(
-    client: TestClient, db_session: Session, cases: str,
+    client: TestClient,
+    db_session: Session,
+    cases: str,
 ):
     user_data = {"email": "test@test.com", "password": "123456"}
 
@@ -50,9 +53,7 @@ def test_get_token_invalid(
         assert response.json() == {"detail": "Inactive user"}
 
 
-def test_current_user_invalid(
-    client: TestClient, db_session: Session
-):
+def test_current_user_invalid(client: TestClient, db_session: Session):
     auth_token = "invalid_token_string"
     headers = {"Authorization": f"Bearer {auth_token}"}
 
@@ -63,7 +64,8 @@ def test_current_user_invalid(
 
 
 def test_current_user_non_existent(
-    client: TestClient, db_session: Session,
+    client: TestClient,
+    db_session: Session,
     auth_headers: tuple[dict[str, str], User],
 ):
     headers, user = auth_headers
@@ -77,7 +79,8 @@ def test_current_user_non_existent(
 
 
 def test_current_user_inactive(
-    client: TestClient, db_session: Session,
+    client: TestClient,
+    db_session: Session,
     auth_headers: tuple[dict[str, str], User],
 ):
     headers, user = auth_headers

@@ -1,7 +1,7 @@
 from typing import Any
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship, Session
 
 from app.database.db import Base
@@ -18,7 +18,6 @@ class ToDo(Base):
 
     user = relationship("User", back_populates="todos")
 
-
     @classmethod
     def create(cls, db: Session, todo_data: ToDoCreate, user_id: int):
         new_todo = ToDo(
@@ -33,20 +32,21 @@ class ToDo(Base):
         return new_todo
 
     @classmethod
-    def get_multiple(
-        cls, db: Session, user_id: int, offset: int = 0, limit: int = 100
-    ):
-        return (db.query(cls).filter(cls.user_id == user_id)
-                .offset(offset).limit(limit).all())
+    def get_multiple(cls, db: Session, user_id: int, offset: int = 0, limit: int = 100):
+        return (
+            db.query(cls)
+            .filter(cls.user_id == user_id)
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
 
     @classmethod
     def get_by_id(cls, db: Session, id: int):
         return db.query(cls).filter(cls.id == id).first()
 
     @classmethod
-    def update(cls, db: Session,
-        current, new: ToDoUpdate | dict[str, Any],
-    ):
+    def update(cls, db: Session, current, new: ToDoUpdate | dict[str, Any]):
         if isinstance(new, dict):
             update_data = new
         else:

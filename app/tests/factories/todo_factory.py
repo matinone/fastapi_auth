@@ -13,4 +13,4 @@ class ToDoFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     class Meta:
         model = ToDo
-        sqlalchemy_session_persistence = 'commit'
+        sqlalchemy_session_persistence = "commit"

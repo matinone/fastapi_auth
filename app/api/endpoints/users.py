@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app import models, schemas

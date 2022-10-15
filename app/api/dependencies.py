@@ -12,6 +12,7 @@ from app.database.db import SessionLocal
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login/token")
 
+
 def get_db():
     """
     Dependency to create/close a new session per request,
@@ -54,15 +55,14 @@ def get_current_user(
     user = models.User.get_by_id(db, id=token_data.sub)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
-    
+
     return user
 
 
 def get_current_active_user(
-    current_user: models.User = Depends(get_current_user)
+    current_user: models.User = Depends(get_current_user),
 ) -> models.User:
     if not current_user.is_active:
         raise HTTPException(

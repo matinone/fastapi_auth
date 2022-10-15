@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -12,7 +11,7 @@ router = APIRouter(prefix="/todos", tags=["todos"])
 def get_todo_from_id(
     todo_id: int,
     db: Session = Depends(dependencies.get_db),
-    current_user: models.User = Depends(dependencies.get_current_active_user)
+    current_user: models.User = Depends(dependencies.get_current_active_user),
 ):
     """
     Common dependency to check that the ToDo item exists and
@@ -63,7 +62,8 @@ def read_todos(
     limit: int = Query(default=100, ge=0),
 ):
     return models.ToDo.get_multiple(
-        db, user_id=current_user.id, offset=offset, limit=limit)
+        db, user_id=current_user.id, offset=offset, limit=limit
+    )
 
 
 @router.get(

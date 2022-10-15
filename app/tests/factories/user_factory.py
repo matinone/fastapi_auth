@@ -1,4 +1,5 @@
 import factory
+
 # from datetime import datetime
 
 from app.models import User
@@ -12,7 +13,6 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     hashed_password = ""
     # created_at = factory.LazyFunction(datetime.now)
 
-
     class Meta:
         model = User
-        sqlalchemy_session_persistence = 'commit'
+        sqlalchemy_session_persistence = "commit"
