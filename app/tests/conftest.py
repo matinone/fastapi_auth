@@ -8,7 +8,7 @@ from app.database.db import Base, create_engine_and_session
 from app.api.dependencies import get_db
 from app.core.security import create_access_token
 from app.models import User
-from app.tests.factories import UserFactory
+from app.tests.factories import UserFactory, ToDoFactory
 
 test_engine, TestSessionLocal = create_engine_and_session(
     db_url="sqlite:///./sql_test.db"
@@ -39,6 +39,7 @@ def db_session(db_connection) -> Session:
     transaction = db_connection.begin()
     session = TestSessionLocal(bind=db_connection)
     UserFactory._meta.sqlalchemy_session = session
+    ToDoFactory._meta.sqlalchemy_session = session
 
     yield session
 
@@ -66,7 +67,7 @@ def auth_headers(db_session) -> tuple[dict[str, str], User]:
     """
     Fixture to get valid authentication headers for a random user.
     """
-    user = UserFactory(email="user@example.com")
+    user = UserFactory.create(email="user@example.com")
     auth_token = create_access_token(subject=user.id)
 
     headers = {"Authorization": f"Bearer {auth_token}"}

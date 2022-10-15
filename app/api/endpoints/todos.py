@@ -35,7 +35,7 @@ def get_todo_from_id(
 
 @router.post(
     "",
-    response_model=schemas.ToDoCreate,
+    response_model=schemas.ToDoOut,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new ToDo",
     response_description="The new created ToDo",
@@ -62,7 +62,8 @@ def read_todos(
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=0),
 ):
-    return models.ToDo.get_multiple(db, offset=offset, limit=limit)
+    return models.ToDo.get_multiple(
+        db, user_id=current_user.id, offset=offset, limit=limit)
 
 
 @router.get(

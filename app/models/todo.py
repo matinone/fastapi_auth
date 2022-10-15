@@ -33,8 +33,11 @@ class ToDo(Base):
         return new_todo
 
     @classmethod
-    def get_multiple(cls, db: Session, offset: int = 0, limit: int = 100):
-        return db.query(cls).offset(offset).limit(limit).all()
+    def get_multiple(
+        cls, db: Session, user_id: int, offset: int = 0, limit: int = 100
+    ):
+        return (db.query(cls).filter(cls.user_id == user_id)
+                .offset(offset).limit(limit).all())
 
     @classmethod
     def get_by_id(cls, db: Session, id: int):
