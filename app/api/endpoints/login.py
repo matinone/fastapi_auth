@@ -6,7 +6,6 @@ from app import models, schemas
 from app.api import dependencies
 from app.core.security import create_access_token
 
-
 router = APIRouter(prefix="/login", tags=["login"])
 
 

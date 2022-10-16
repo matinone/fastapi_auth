@@ -1,14 +1,13 @@
 import pytest
-
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.main import app
-from app.database.db import Base, create_engine_and_session
 from app.api.dependencies import get_db
 from app.core.security import create_access_token
+from app.database.db import Base, create_engine_and_session
+from app.main import app
 from app.models import User
-from app.tests.factories import UserFactory, ToDoFactory
+from app.tests.factories import ToDoFactory, UserFactory
 
 test_engine, TestSessionLocal = create_engine_and_session(
     db_url="sqlite:///./sql_test.db"

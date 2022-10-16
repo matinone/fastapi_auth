@@ -1,14 +1,12 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from jose import ExpiredSignatureError, JWTError, jwt
 from pydantic import ValidationError
-
 from sqlalchemy.orm import Session
-from jose import jwt, JWTError, ExpiredSignatureError
 
 from app import models, schemas
 from app.core.config import Settings, get_settings
 from app.database.db import SessionLocal
-
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login/token")
 

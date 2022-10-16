@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database.db import engine, Base
 from app.api.api import api_router
+from app.database.db import Base, engine
 
 # create DB tables (would be better to use Alembic)
 Base.metadata.create_all(bind=engine)

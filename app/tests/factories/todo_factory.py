@@ -1,7 +1,8 @@
 import factory
 
-from .user_factory import UserFactory
 from app.models import ToDo
+
+from .user_factory import UserFactory
 
 
 class ToDoFactory(factory.alchemy.SQLAlchemyModelFactory):

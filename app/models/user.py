@@ -2,10 +2,10 @@ from typing import Any
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Boolean, Column, Integer, String
-from sqlalchemy.orm import relationship, Session
+from sqlalchemy.orm import Session, relationship
 
+from app.core.security import get_password_hash, verify_password
 from app.database.db import Base
-from app.core.security import verify_password, get_password_hash
 from app.schemas.user import UserCreate, UserUpdate
 
 

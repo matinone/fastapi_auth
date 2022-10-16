@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api import dependencies
-
 
 router = APIRouter(prefix="/users", tags=["users"])
 

@@ -2,7 +2,7 @@ from typing import Any
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship, Session
+from sqlalchemy.orm import Session, relationship
 
 from app.database.db import Base
 from app.schemas.todo import ToDoCreate, ToDoUpdate
