@@ -10,18 +10,18 @@ repos:
     hooks:
       - id: black
         name: Black Python code formatting
-        entry: bash -c 'black "$@"; git add -u' --
+        entry: bash -c 'black app/; git add -u' --
         language: python
         files: \.py$
         types: [python]
       - id: isort
         name: Sorting import statements
-        entry: bash -c 'isort "$@"; git add -u' --
+        entry: bash -c 'isort app/; git add -u' --
         language: python
-        args: ["--profile black --filter-files"]
+        args: ["--profile", "black", "--filter-files", "--skip-gitignore"]
         files: \.py$
       - id: flake8
         name: Flake8 Python style check
-        entry: bash -c 'flake8 "$@"' --
+        entry: bash -c 'flake8 app/' --
         language: python
         files: \.py$

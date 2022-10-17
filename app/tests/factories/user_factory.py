@@ -1,6 +1,7 @@
 import factory
 
 from app.models import User
+
 # from datetime import datetime
 
 
