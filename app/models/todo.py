@@ -34,14 +34,22 @@ class ToDo(Base):
         return new_todo
 
     @classmethod
-    def get_multiple(cls, db: Session, user_id: int, offset: int = 0, limit: int = 100):
-        return (
-            db.query(cls)
-            .filter(cls.user_id == user_id)
-            .offset(offset)
-            .limit(limit)
-            .all()
-        )
+    def get_multiple(
+        cls,
+        db: Session,
+        user_id: int,
+        offset: int = 0,
+        limit: int = 100,
+        start_datetime=None,
+        end_datetime=None,
+    ):
+        query = db.query(cls).filter(cls.user_id == user_id)
+        if start_datetime:
+            query = query.filter(cls.time_created >= start_datetime)
+        if end_datetime:
+            query = query.filter(cls.time_created <= end_datetime)
+
+        return query.offset(offset).limit(limit).all()
 
     @classmethod
     def get_by_id(cls, db: Session, id: int):

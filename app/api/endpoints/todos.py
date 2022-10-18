@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
@@ -59,9 +61,16 @@ def read_todos(
     current_user: models.User = Depends(dependencies.get_current_active_user),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=0),
+    start_datetime: datetime | None = None,
+    end_datetime: datetime | None = None,
 ):
     return models.ToDo.get_multiple(
-        db, user_id=current_user.id, offset=offset, limit=limit
+        db,
+        user_id=current_user.id,
+        offset=offset,
+        limit=limit,
+        start_datetime=start_datetime,
+        end_datetime=end_datetime,
     )
 
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 from fastapi import status
@@ -104,7 +104,69 @@ def test_get_todos(
     for todo in todos:
         assert "title" in todo
         assert "description" in todo
+        assert "time_created" in todo
         assert todo.get("user_id") == user.id
+
+
+@pytest.mark.parametrize(
+    "datetime_param",
+    ["start_datetime", "end_datetime", "start_end_datetime"],
+)
+def test_get_todos_datetime(
+    client: TestClient,
+    db_session: Session,
+    auth_headers: tuple[dict[str, str], User],
+    datetime_param,
+):
+    headers, user = auth_headers
+
+    now = datetime.utcnow()
+
+    user_now = ToDoFactory.create(user=user, time_created=now)
+    user_before = ToDoFactory.create(user=user, time_created=now - timedelta(hours=2))
+    user_later = ToDoFactory.create(user=user, time_created=now + timedelta(hours=2))
+
+    # start time to include now and later only
+    start_datetime = (now - timedelta(hours=1)).isoformat()
+    # end time to include now and before only
+    end_datetime = (now + timedelta(hours=1)).isoformat()
+
+    if datetime_param == "start_datetime":
+        query_params = f"?start_datetime={start_datetime}"
+    elif datetime_param == "end_datetime":
+        query_params = f"?end_datetime={end_datetime}"
+    else:
+        query_params = f"?start_datetime={start_datetime}&end_datetime={end_datetime}"
+
+    response = client.get(
+        f"/api/todos{query_params}",
+        headers=headers,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    todos = response.json()
+    if datetime_param == "start_datetime":
+        assert len(todos) == 2
+        expected_datetimes = [
+            user_now.time_created.isoformat(),
+            user_later.time_created.isoformat(),
+        ]
+    elif datetime_param == "end_datetime":
+        expected_datetimes = [
+            user_now.time_created.isoformat(),
+            user_before.time_created.isoformat(),
+        ]
+        assert len(todos) == 2
+    else:
+        assert len(todos) == 1
+        expected_datetimes = [user_now.time_created.isoformat()]
+
+    for todo in todos:
+        assert "title" in todo
+        assert "description" in todo
+        assert todo.get("user_id") == user.id
+        assert todo["time_created"] in expected_datetimes
 
 
 @pytest.mark.parametrize("cases", ["found", "not_found", "other_user"])
