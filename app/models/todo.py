@@ -1,8 +1,9 @@
 from typing import Any
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Session, relationship
+from sqlalchemy.sql import func
 
 from app.database.db import Base
 from app.schemas.todo import ToDoCreate, ToDoUpdate
@@ -14,6 +15,7 @@ class ToDo(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, index=True)
     description = Column(String)
+    time_created = Column(DateTime(timezone=True), server_default=func.now())
     user_id = Column(Integer, ForeignKey("users.id"))
 
     user = relationship("User", back_populates="todos")

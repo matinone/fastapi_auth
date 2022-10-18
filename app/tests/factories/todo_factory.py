@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import factory
 
 from app.models import ToDo
@@ -9,6 +11,7 @@ class ToDoFactory(factory.alchemy.SQLAlchemyModelFactory):
     id = factory.Sequence(lambda x: f"{x}")
     title = factory.Faker("sentence")
     description = factory.Faker("paragraph")
+    time_created = factory.LazyFunction(datetime.now)
 
     user = factory.SubFactory(UserFactory)
 

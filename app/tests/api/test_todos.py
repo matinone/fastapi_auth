@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -16,6 +18,7 @@ def test_create_todo(
 ):
     headers, user = auth_headers
 
+    time_before = datetime.utcnow().replace(microsecond=0)
     data = {"title": "My first ToDo", "description": "This is just my first ToDo"}
 
     if todo_params == "no_title":
@@ -48,6 +51,19 @@ def test_create_todo(
         else:
             assert created_todo["description"] == data["description"]
             assert db_todo.description == data["description"]
+
+        assert "time_created" in created_todo
+        time_after = datetime.utcnow().replace(microsecond=0)
+        created_todo_datetime = datetime.strptime(
+            created_todo["time_created"], "%Y-%m-%dT%H:%M:%S"
+        )
+
+        assert (
+            db_todo.time_created >= time_before and db_todo.time_created <= time_after
+        )
+        assert (
+            created_todo_datetime >= time_before and created_todo_datetime <= time_after
+        )
 
 
 def test_create_todo_not_logged_in(

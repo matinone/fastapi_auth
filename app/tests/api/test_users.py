@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
@@ -9,6 +11,7 @@ from app.tests.factories import UserFactory
 
 def test_create_user(client: TestClient, db_session: Session):
 
+    time_before = datetime.utcnow().replace(microsecond=0)
     data = {
         "email": "user@example.com",
         "password": "123456",
@@ -35,6 +38,15 @@ def test_create_user(client: TestClient, db_session: Session):
 
     assert db_user.is_active
     assert created_user.get("is_active")
+
+    assert "time_created" in created_user
+    time_after = datetime.utcnow().replace(microsecond=0)
+    created_user_datetime = datetime.strptime(
+        created_user["time_created"], "%Y-%m-%dT%H:%M:%S"
+    )
+
+    assert db_user.time_created >= time_before and db_user.time_created <= time_after
+    assert created_user_datetime >= time_before and created_user_datetime <= time_after
 
 
 def test_create_user_existing_email(client: TestClient, db_session: Session):

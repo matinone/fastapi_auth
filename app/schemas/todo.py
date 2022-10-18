@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel
 
 
@@ -23,6 +25,7 @@ class ToDoUpdate(ToDoBase):
 # properties stored in the DB
 class ToDoOut(ToDoBase):
     id: int
+    time_created: datetime
     user_id: int
 
     class Config:

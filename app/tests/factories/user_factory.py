@@ -1,8 +1,8 @@
+from datetime import datetime
+
 import factory
 
 from app.models import User
-
-# from datetime import datetime
 
 
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -11,7 +11,7 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     full_name = factory.Faker("name")
     is_active = True
     hashed_password = ""
-    # created_at = factory.LazyFunction(datetime.now)
+    time_created = factory.LazyFunction(datetime.now)
 
     class Meta:
         model = User

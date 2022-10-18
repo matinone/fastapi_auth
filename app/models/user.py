@@ -1,8 +1,9 @@
 from typing import Any
 
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import Session, relationship
+from sqlalchemy.sql import func
 
 from app.core.security import get_password_hash, verify_password
 from app.database.db import Base
@@ -17,6 +18,7 @@ class User(Base):
     full_name = Column(String)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
+    time_created = Column(DateTime(timezone=True), server_default=func.now())
 
     todos = relationship("ToDo", back_populates="user")
 
