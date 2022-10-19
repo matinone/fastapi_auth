@@ -69,7 +69,7 @@ def test_current_user_non_existent(
 ):
     headers, user = auth_headers
 
-    User.delete(db_session, user=user)
+    User.delete(db_session, db_obj=user)
 
     response = client.get("/api/users/me", headers=headers)
 

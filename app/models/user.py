@@ -1,6 +1,5 @@
 from typing import Any
 
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.sql import func
@@ -9,8 +8,10 @@ from app.core.security import get_password_hash, verify_password
 from app.database.db import Base
 from app.schemas.user import UserCreate, UserUpdate
 
+from .base_crud_model import BaseCrudModel
 
-class User(Base):
+
+class User(Base, BaseCrudModel):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -40,10 +41,6 @@ class User(Base):
         return db.query(cls).offset(offset).limit(limit).all()
 
     @classmethod
-    def get_by_id(cls, db: Session, id: int):
-        return db.query(cls).filter(cls.id == id).first()
-
-    @classmethod
     def get_by_email(cls, db: Session, email: str):
         return db.query(cls).filter(cls.email == email).first()
 
@@ -65,31 +62,7 @@ class User(Base):
             update_data["hashed_password"] = get_password_hash(update_data["password"])
             update_data.pop("password")
 
-        current_data = jsonable_encoder(current)
-        for field in current_data:
-            if field in update_data:
-                setattr(current, field, update_data[field])
-
-        db.add(current)
-        db.commit()
-        db.refresh(current)
-
-        return current
-
-    @classmethod
-    def delete(cls, db: Session, user):
-        db.delete(user)
-        db.commit()
-
-        return user
-
-    @classmethod
-    def delete_by_id(cls, db: Session, id: int):
-        user = cls.get_by_id(db, id)
-        db.delete(user)
-        db.commit()
-
-        return user
+        return BaseCrudModel.update(db, current=current, new=update_data)
 
     @classmethod
     def authenticate(cls, db: Session, email: str, password: str):

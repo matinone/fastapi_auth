@@ -1,15 +1,14 @@
-from typing import Any
-
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.sql import func
 
 from app.database.db import Base
-from app.schemas.todo import ToDoCreate, ToDoUpdate
+from app.schemas.todo import ToDoCreate
+
+from .base_crud_model import BaseCrudModel
 
 
-class ToDo(Base):
+class ToDo(Base, BaseCrudModel):
     __tablename__ = "todos"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -50,41 +49,3 @@ class ToDo(Base):
             query = query.filter(cls.time_created <= end_datetime)
 
         return query.offset(offset).limit(limit).all()
-
-    @classmethod
-    def get_by_id(cls, db: Session, id: int):
-        return db.query(cls).filter(cls.id == id).first()
-
-    @classmethod
-    def update(cls, db: Session, current, new: ToDoUpdate | dict[str, Any]):
-        if isinstance(new, dict):
-            update_data = new
-        else:
-            # exclude_unset=True to avoid updating to default values
-            update_data = new.dict(exclude_unset=True)
-
-        current_data = jsonable_encoder(current)
-        for field in current_data:
-            if field in update_data:
-                setattr(current, field, update_data[field])
-
-        db.add(current)
-        db.commit()
-        db.refresh(current)
-
-        return current
-
-    @classmethod
-    def delete(cls, db: Session, todo):
-        db.delete(todo)
-        db.commit()
-
-        return todo
-
-    @classmethod
-    def delete_by_id(cls, db: Session, id: int):
-        todo = cls.get_by_id(db, id)
-        db.delete(todo)
-        db.commit()
-
-        return todo
