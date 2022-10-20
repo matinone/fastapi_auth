@@ -15,10 +15,13 @@ class Settings(BaseSettings):
 
     SQLALCHEMY_DATABASE_URL: str = "sqlite:///./sql_dev.db"
 
+    GOOGLE_CLIENT_ID: str = "dummy_id"
+    GOOGLE_CLIENT_SECRET: str = "dummy_secret"
+
     class Config:
         env_file = ".env"
 
 
 @lru_cache()
-def get_settings():
+def get_settings() -> Settings:
     return Settings()

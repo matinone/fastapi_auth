@@ -16,7 +16,7 @@ def test_get_token_valid(
     assert response.status_code == status.HTTP_201_CREATED
 
     form_data = {"username": user_data["email"], "password": user_data["password"]}
-    response = client.post("api/login/token", data=form_data)
+    response = client.post("api/token", data=form_data)
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -43,7 +43,7 @@ def test_get_token_invalid(
         db_user = User.get_by_email(db_session, email=user_data["email"])
         db_user.is_active = False
 
-    response = client.post("api/login/token", data=form_data)
+    response = client.post("api/token", data=form_data)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     if cases == "incorrect":
