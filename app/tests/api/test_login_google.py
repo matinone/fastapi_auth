@@ -50,7 +50,7 @@ def test_login_google_redirect(
     mocker,
 ):
 
-    mocker.patch("app.api.endpoints.login.oauth", mock_oauth_google())
+    mocker.patch("app.api.endpoints.login_google.oauth", mock_oauth_google())
 
     response = client.get("/api/login_google")
     assert response.status_code == status.HTTP_302_FOUND
@@ -63,7 +63,9 @@ def test_login_google_valid_token(
 ):
 
     user = UserFactory.create()
-    mocker.patch("app.api.endpoints.login.oauth", mock_oauth_google(email=user.email))
+    mocker.patch(
+        "app.api.endpoints.login_google.oauth", mock_oauth_google(email=user.email)
+    )
 
     response = client.get("/api/token_google")
     assert response.status_code == status.HTTP_200_OK
@@ -80,7 +82,7 @@ def test_login_google_oauth_error(
 ):
 
     mocker.patch(
-        "app.api.endpoints.login.oauth", mock_oauth_google(raise_exception=True)
+        "app.api.endpoints.login_google.oauth", mock_oauth_google(raise_exception=True)
     )
 
     response = client.get("/api/token_google")
@@ -96,7 +98,8 @@ def test_login_google_no_user_data(
 ):
 
     mocker.patch(
-        "app.api.endpoints.login.oauth", mock_oauth_google(return_user_info=False)
+        "app.api.endpoints.login_google.oauth",
+        mock_oauth_google(return_user_info=False),
     )
 
     response = client.get("/api/token_google")

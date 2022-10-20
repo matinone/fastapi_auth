@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import get_db
 from app.core.security import create_access_token
 from app.database.db import Base, create_engine_and_session
-from app.main import app
+from app.main import app, google_auth_app
 from app.models import User
-from app.tests.factories import ToDoFactory, UserFactory
+from app.tests.factories import UserFactory, factory_list
 
 test_engine, TestSessionLocal = create_engine_and_session(
     db_url="sqlite:///./sql_test.db"
@@ -37,8 +37,9 @@ def db_session(db_connection) -> Session:
     """
     transaction = db_connection.begin()
     session = TestSessionLocal(bind=db_connection)
-    UserFactory._meta.sqlalchemy_session = session
-    ToDoFactory._meta.sqlalchemy_session = session
+
+    for fact in factory_list:
+        fact._meta.sqlalchemy_session = session
 
     yield session
 
@@ -54,6 +55,7 @@ def client(db_session) -> TestClient:
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
+    google_auth_app.dependency_overrides[get_db] = override_get_db
 
     with TestClient(app) as c:
         yield c
