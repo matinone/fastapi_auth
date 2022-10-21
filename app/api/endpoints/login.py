@@ -4,7 +4,8 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api import dependencies
-from app.core.security import create_access_token
+from app.core.config import get_settings
+from app.core.security import create_access_token, create_refresh_token
 
 router = APIRouter(prefix="", tags=["login"])
 
@@ -21,19 +22,22 @@ def _check_active_user_exists(user):
         )
 
 
-def _generate_token_response(user_id):
-    access_token = create_access_token(subject=user_id)
+def _generate_token_response(user_id, include_refresh=True):
     response = {
-        "access_token": access_token,
+        "access_token": create_access_token(subject=user_id),
         "token_type": "bearer",
     }
+
+    if include_refresh:
+        response["refresh_token"] = create_refresh_token(subject=user_id)
 
     return response
 
 
 @router.post(
     "/token",
-    response_model=schemas.token.Token,
+    response_model=schemas.Token,
+    response_model_exclude_unset=True,
     status_code=status.HTTP_201_CREATED,
     summary="Get a new access token",
     response_description="The access token",
@@ -52,4 +56,33 @@ def get_access_token_from_username(
     _check_active_user_exists(user)
 
     response = _generate_token_response(user.id)
+    return response
+
+
+@router.post(
+    "/refresh_token",
+    response_model=schemas.Token,
+    response_model_exclude_unset=True,
+    status_code=status.HTTP_201_CREATED,
+    summary="Get a new access token from a refresh token",
+    response_description="The access token",
+)
+def get_access_token_from_refresh_token(
+    refresh_token: schemas.RefreshToken,
+    db: Session = Depends(dependencies.get_db),
+):
+    if refresh_token.grant_type != "refresh_token":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid refresh token",
+        )
+
+    token_data = dependencies.decode_token(refresh_token.token, get_settings())
+    user = models.User.get_by_id(db, id=token_data.sub)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    response = _generate_token_response(user.id, include_refresh=False)
     return response

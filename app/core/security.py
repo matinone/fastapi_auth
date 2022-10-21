@@ -29,6 +29,11 @@ def create_access_token(
     return encoded_jwt
 
 
+def create_refresh_token(subject: str | int) -> str:
+    expire = timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    return create_access_token(subject, expire)
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 

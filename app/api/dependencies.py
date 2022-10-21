@@ -11,6 +11,28 @@ from app.database.db import SessionLocal
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login/token")
 
 
+def decode_token(token: str, settings: Settings) -> schemas.TokenPayload:
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        # raises ValidationError if the payload is not valid
+        token_data = schemas.TokenPayload(**payload)
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Token expired",
+        )
+    except (JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return token_data
+
+
 def get_db():
     """
     Dependency to create/close a new session per request,
@@ -32,24 +54,7 @@ def get_current_user(
     """
     Dependency to get the current user from the provided token.
     """
-    try:
-        payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
-        # raises ValidationError if the payload is not valid
-        token_data = schemas.TokenPayload(**payload)
-    except ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Token expired",
-        )
-    except (JWTError, ValidationError):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
+    token_data = decode_token(token, settings)
     user = models.User.get_by_id(db, id=token_data.sub)
     if not user:
         raise HTTPException(
