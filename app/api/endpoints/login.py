@@ -86,3 +86,26 @@ def get_access_token_from_refresh_token(
 
     response = _generate_token_response(user.id, include_refresh=False)
     return response
+
+
+@router.post(
+    "/register",
+    response_model=schemas.User,
+    status_code=status.HTTP_201_CREATED,
+    summary="Register a new user",
+    response_description="The new created user",
+)
+def create_user(
+    *,
+    db: Session = Depends(dependencies.get_db),
+    user_in: schemas.UserCreate,
+):
+    user = models.User.get_by_email(db, user_in.email)
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already registered",
+        )
+
+    user = models.User.create(db, user_in)
+    return user

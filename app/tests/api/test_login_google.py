@@ -1,8 +1,10 @@
+import pytest
 from authlib.integrations.starlette_client import OAuthError
 from fastapi import Response, status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.models import User
 from app.tests.factories import UserFactory
 
 
@@ -25,7 +27,7 @@ def mock_oauth_google(
                 raise OAuthError()
 
             if self.return_user_info:
-                return {"userinfo": {"email": self.email}}
+                return {"userinfo": {"email": self.email, "name": "Random Name"}}
 
             return {}
 
@@ -44,15 +46,18 @@ def mock_oauth_google(
     )
 
 
-def test_login_google_redirect(
+@pytest.mark.parametrize("cases", ["login", "register"])
+def test_google_redirect(
     client: TestClient,
     db_session: Session,
+    cases: str,
     mocker,
 ):
 
     mocker.patch("app.api.endpoints.login_google.oauth", mock_oauth_google())
 
-    response = client.get("/api/login_google")
+    endpoint = "login_google" if cases == "login" else "register_google"
+    response = client.get(f"/api/{endpoint}")
     assert response.status_code == status.HTTP_302_FOUND
 
 
@@ -75,9 +80,11 @@ def test_login_google_valid_token(
     assert token["token_type"] == "bearer"
 
 
-def test_login_google_oauth_error(
+@pytest.mark.parametrize("cases", ["login", "register"])
+def test_google_oauth_error(
     client: TestClient,
     db_session: Session,
+    cases: str,
     mocker,
 ):
 
@@ -85,15 +92,20 @@ def test_login_google_oauth_error(
         "app.api.endpoints.login_google.oauth", mock_oauth_google(raise_exception=True)
     )
 
-    response = client.get("/api/token_google")
+    if cases == "login":
+        response = client.get("/api/token_google")
+    else:
+        response = client.post("/api/new_user_google")
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
     assert response.json() == {"detail": "Could not validate credentials"}
 
 
-def test_login_google_no_user_data(
+@pytest.mark.parametrize("cases", ["login", "register"])
+def test_google_no_user_data(
     client: TestClient,
     db_session: Session,
+    cases: str,
     mocker,
 ):
 
@@ -102,7 +114,46 @@ def test_login_google_no_user_data(
         mock_oauth_google(return_user_info=False),
     )
 
-    response = client.get("/api/token_google")
+    if cases == "login":
+        response = client.get("/api/token_google")
+    else:
+        response = client.post("/api/new_user_google")
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"detail": "Incorrect email or password"}
+
+
+def test_register_user_google(
+    client: TestClient,
+    db_session: Session,
+    mocker,
+):
+
+    email = "user@gmail.com"
+    mocker.patch("app.api.endpoints.login_google.oauth", mock_oauth_google(email=email))
+
+    response = client.post("/api/new_user_google")
+    assert response.status_code == status.HTTP_201_CREATED
+
+    created_user = response.json()
+    db_user = User.get_by_email(db_session, email=email)
+
+    assert db_user
+    assert created_user["email"] == email
+    assert db_user.email == email
+
+
+def test_register_user_google_existing_email(
+    client: TestClient,
+    db_session: Session,
+    mocker,
+):
+
+    user = UserFactory.create()
+    mocker.patch(
+        "app.api.endpoints.login_google.oauth", mock_oauth_google(email=user.email)
+    )
+
+    response = client.post("/api/new_user_google")
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {"detail": "Email already registered"}
