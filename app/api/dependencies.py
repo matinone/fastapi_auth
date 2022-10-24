@@ -1,36 +1,13 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import ExpiredSignatureError, JWTError, jwt
-from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import models
 from app.core.config import Settings, get_settings
+from app.core.security import decode_token
 from app.database.db import SessionLocal
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/login/token")
-
-
-def decode_token(token: str, settings: Settings) -> schemas.TokenPayload:
-    try:
-        payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
-        )
-        # raises ValidationError if the payload is not valid
-        token_data = schemas.TokenPayload(**payload)
-    except ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Token expired",
-        )
-    except (JWTError, ValidationError):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return token_data
 
 
 def get_db():

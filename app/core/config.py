@@ -13,11 +13,15 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
+    PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 30
 
     SQLALCHEMY_DATABASE_URL: str = "sqlite:///./sql_dev.db"
 
     GOOGLE_CLIENT_ID: str = "dummy_id"
     GOOGLE_CLIENT_SECRET: str = "dummy_secret"
+
+    EMAIL_ENABLED: bool = False
+    EMAIL_SENDER: str = "noreply@gmail.com"
 
     class Config:
         env_file = ".env"

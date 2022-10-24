@@ -9,7 +9,7 @@ Complete user authentication support, with sample endpoints to handle users and 
 * Refresh tokens support.
 * Protected endpoints.
 * Interactive API documentation (provided by Swagger UI).
-* 99% test coverage.
+* 100% test coverage (`app/api/`).
 * Python formatting and styling using black, isort and flake8.
 
 ## Technologies / frameworks / tools

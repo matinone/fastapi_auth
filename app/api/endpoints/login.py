@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api import dependencies
-from app.core.config import get_settings
+from app.core.config import Settings, get_settings
 from app.core.security import create_access_token, create_refresh_token
 
 router = APIRouter(prefix="", tags=["login"])
@@ -70,6 +70,7 @@ def get_access_token_from_username(
 def get_access_token_from_refresh_token(
     refresh_token: schemas.RefreshToken,
     db: Session = Depends(dependencies.get_db),
+    settings: Settings = Depends(get_settings),
 ):
     if refresh_token.grant_type != "refresh_token":
         raise HTTPException(
@@ -77,7 +78,7 @@ def get_access_token_from_refresh_token(
             detail="Invalid refresh token",
         )
 
-    token_data = dependencies.decode_token(refresh_token.token, get_settings())
+    token_data = dependencies.decode_token(refresh_token.token, settings)
     user = models.User.get_by_id(db, id=token_data.sub)
     if not user:
         raise HTTPException(
