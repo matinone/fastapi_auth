@@ -21,6 +21,17 @@ def send_password_recovery_email(user: User, url: str):
     )
 
 
+def send_account_verification_email(user: User, url: str):
+    send_template_email(
+        template="account_verification.html",
+        to=user.email,
+        subj=f"Account Verification for user {user.email}",
+        username=user.email,
+        url=url,
+        token_expire=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES,
+    )
+
+
 def send_template_email(template, to, subj, **kwargs):
 
     env = Environment(

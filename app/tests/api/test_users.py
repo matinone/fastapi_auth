@@ -70,6 +70,7 @@ def test_get_user_me(client: TestClient, auth_headers: tuple[dict[str, str], Use
     assert current_user["full_name"] == user.full_name
     assert current_user["id"] == user.id
     assert current_user["is_active"]
+    assert "is_verified" in current_user
 
 
 @pytest.mark.parametrize("found", [True, False], ids=["user_found", "user_not_found"])
@@ -93,6 +94,7 @@ def test_get_user_by_id(
         assert resp_user["full_name"] == user.full_name
         assert resp_user["id"] == user.id
         assert resp_user["is_active"]
+        assert "is_verified" in resp_user
 
 
 def test_get_users(client: TestClient, auth_headers: tuple[dict[str, str], User]):
@@ -111,6 +113,7 @@ def test_get_users(client: TestClient, auth_headers: tuple[dict[str, str], User]
         assert "full_name" in u
         assert "id" in u
         assert u.get("is_active")
+        assert "is_verified" in u
 
     # current user must be present in the returned users list
     assert user.email in [u["email"] for u in users]

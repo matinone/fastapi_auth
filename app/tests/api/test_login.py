@@ -1,10 +1,14 @@
+from unittest.mock import ANY, MagicMock
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from app.core.security import create_account_verification_token
 from app.models import User
 from app.tests.factories import UserFactory
+from app.tests.fixtures import mock_email  # noqa: F401
 
 
 def test_get_access_token_valid(
@@ -111,7 +115,11 @@ def test_get_refresh_token_invalid(
         assert response.json() == {"detail": "User not found"}
 
 
-def test_register_user(client: TestClient, db_session: Session):
+def test_register_user(
+    client: TestClient,
+    db_session: Session,
+    mock_email: MagicMock,  # noqa: F811
+):
 
     data = {
         "email": "user@example.com",
@@ -119,10 +127,7 @@ def test_register_user(client: TestClient, db_session: Session):
         "full_name": "Random Name",
     }
 
-    response = client.post(
-        "/api/register",
-        json=data,
-    )
+    response = client.post("/api/register", json=data)
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -139,7 +144,32 @@ def test_register_user(client: TestClient, db_session: Session):
 
     assert db_user.is_active
     assert created_user.get("is_active")
+    assert not db_user.is_verified
+    assert not created_user.get("is_verified")
     assert "time_created" in created_user
+
+    mock_email.assert_called_once_with(
+        db_user.email, f"Account Verification for user {db_user.email}", ANY
+    )
+
+
+def test_register_user_email_disabled(client: TestClient, db_session: Session):
+    data = {
+        "email": "user@example.com",
+        "password": "123456",
+        "full_name": "Random Name",
+    }
+
+    response = client.post("/api/register", json=data)
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    created_user = response.json()
+    db_user = User.get_by_email(db_session, email=data["email"])
+
+    assert db_user
+    assert db_user.is_verified
+    assert created_user.get("is_verified")
 
 
 def test_register_user_existing_email(client: TestClient, db_session: Session):
@@ -190,3 +220,27 @@ def test_current_user_inactive(
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"detail": "Inactive user"}
+
+
+def test_verify_account(client: TestClient, db_session: Session):
+    user = UserFactory.create(is_verified=False)
+
+    token = create_account_verification_token(user.email)
+    verify_data = {"token": token}
+    response = client.post("api/verify_account", json=verify_data)
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"message": "User verified"}
+    assert user.is_verified
+
+
+def test_verify_account_not_found(client: TestClient, db_session: Session):
+    user = UserFactory.create(is_verified=False)
+
+    token = create_account_verification_token(user.email)
+    verify_data = {"token": token}
+    User.delete(db_session, user)
+    response = client.post("api/verify_account", json=verify_data)
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json() == {"detail": "No user registered with that email"}

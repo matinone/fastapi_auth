@@ -64,6 +64,11 @@ def create_password_reset_token(email: str) -> str:
     return create_access_token(email, expire)
 
 
+def create_account_verification_token(email: str) -> str:
+    expire = timedelta(minutes=settings.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES)
+    return create_access_token(email, expire)
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 

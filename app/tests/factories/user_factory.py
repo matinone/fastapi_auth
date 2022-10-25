@@ -10,6 +10,7 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     email = factory.Faker("email")
     full_name = factory.Faker("name")
     is_active = True
+    is_verified = False
     hashed_password = ""
     time_created = factory.LazyFunction(datetime.now)
 

@@ -123,5 +123,6 @@ async def create_user_from_google(
     if "name" in user_data:
         user_create.full_name = user_data["name"]
 
-    user = models.User.create(db, user_create)
+    # user already verified if registering using Google
+    user = models.User.create(db, user_create, is_verified=True)
     return user
