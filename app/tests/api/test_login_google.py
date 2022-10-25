@@ -141,6 +141,8 @@ def test_register_user_google(
     assert db_user
     assert created_user["email"] == email
     assert db_user.email == email
+    assert created_user["is_verified"]
+    assert db_user.is_verified
 
 
 def test_register_user_google_existing_email(
