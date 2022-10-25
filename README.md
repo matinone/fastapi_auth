@@ -6,6 +6,7 @@ Complete user authentication support, with sample endpoints to handle users and 
 ## Features
 * User registration and login using username (email) and password (OAuth2) to create the user and generate access tokens.
 * User registration and login using Google credentials to create the user and generate access tokens.
+* Email account verification and password recovery.
 * Refresh tokens support.
 * Protected endpoints.
 * Interactive API documentation (provided by Swagger UI).
