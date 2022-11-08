@@ -4,12 +4,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.api import api_router
 from app.api.endpoints.login_google import google_auth_app
 from app.core.security import get_settings
-from app.database.db import Base, engine
+from app.database.init_db import init_db
 
 if get_settings().ENVIRONMENT != "test":
-    # create DB tables (would be better to use Alembic)
-    Base.metadata.create_all(bind=engine)
-
+    # create DB tables (would be better to use Alembic) and superuser
+    init_db()
 
 app = FastAPI(title="Simple To-Do API")
 

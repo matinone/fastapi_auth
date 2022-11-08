@@ -26,12 +26,19 @@ class User(Base, BaseCrudModel):
     todos = relationship("ToDo", back_populates="user")
 
     @classmethod
-    def create(cls, db: Session, user_data: UserCreate, is_verified: bool = False):
+    def create(
+        cls,
+        db: Session,
+        user_data: UserCreate,
+        is_verified: bool = False,
+        is_superuser: bool = False,
+    ):
         new_user = User(
             email=user_data.email,
             full_name=user_data.full_name,
             hashed_password=get_password_hash(user_data.password),
             is_verified=is_verified,
+            is_superuser=is_superuser,
         )
         db.add(new_user)
         db.commit()
