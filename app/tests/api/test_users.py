@@ -100,35 +100,56 @@ def test_get_user_me(client: TestClient, auth_headers: tuple[dict[str, str], Use
     assert "is_verified" in current_user
 
 
-@pytest.mark.parametrize("found", [True, False], ids=["user_found", "user_not_found"])
+@pytest.mark.parametrize(
+    "user_type",
+    ["user_not_found", "same_user", "other_user_not_super", "other_user_super"],
+)
 def test_get_user_by_id(
     client: TestClient,
+    db_session: Session,
     auth_headers: tuple[dict[str, str], User],
-    found,
+    user_type: str,
 ):
     headers, user = auth_headers
-    user_id = user.id if found else "123456789"
+
+    other_user = None
+    if user_type == "user_not_found":
+        user_id = "123456789"
+    elif user_type == "same_user":
+        user_id = user.id
+    else:
+        other_user = UserFactory.create()
+        user_id = other_user.id
+        if user_type == "other_user_super":
+            user.is_superuser = True
+            User.update(db_session, user, new={"is_superuser": True})
+
     response = client.get(f"/api/users/{user_id}", headers=headers)
 
-    if not found:
+    if user_type == "user_not_found":
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json() == {"detail": "User not found"}
+    elif user_type == "other_user_not_super":
+        assert response.status_code == status.HTTP_403_FORBIDDEN
     else:
         assert response.status_code == status.HTTP_200_OK
+        expected_user = user if user_type == "same_user" else other_user
 
         resp_user = response.json()
-        assert resp_user["email"] == user.email
-        assert resp_user["full_name"] == user.full_name
-        assert resp_user["id"] == user.id
+        assert resp_user["email"] == expected_user.email
+        assert resp_user["full_name"] == expected_user.full_name
+        assert resp_user["id"] == expected_user.id
         assert resp_user["is_active"]
         assert "is_verified" in resp_user
 
 
-def test_get_users(client: TestClient, auth_headers: tuple[dict[str, str], User]):
+def test_get_users(
+    client: TestClient, auth_headers_superuser: tuple[dict[str, str], User]
+):
     extra_users = 3
     UserFactory.create_batch(extra_users)
 
-    headers, user = auth_headers
+    headers, user = auth_headers_superuser
     response = client.get("/api/users", headers=headers)
 
     assert response.status_code == status.HTTP_200_OK
