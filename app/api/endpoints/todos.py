@@ -24,7 +24,7 @@ def get_todo_from_id(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="ToDo not found",
         )
-    if todo.user_id != current_user.id:
+    if todo.user_id != current_user.id and not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="ToDo does not belong to current user",
