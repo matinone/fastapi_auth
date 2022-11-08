@@ -9,51 +9,78 @@ from app.models import User
 from app.tests.factories import UserFactory
 
 
-def test_create_user(client: TestClient, db_session: Session):
+@pytest.mark.parametrize("cases", ["unauthenticated", "not_superuser", "superuser"])
+def test_create_user(
+    client: TestClient,
+    db_session: Session,
+    auth_headers: tuple[dict[str, str], User],
+    cases: str,
+):
+    headers, user = auth_headers
 
     time_before = datetime.utcnow().replace(microsecond=0)
     data = {
-        "email": "user@example.com",
+        "email": "new_user@example.com",
         "password": "123456",
         "full_name": "Random Name",
     }
 
-    response = client.post(
-        "/api/users",
-        json=data,
-    )
+    if cases == "unauthenticated":
+        response = client.post("/api/users", json=data)
+    else:
+        User.update(db_session, user, new={"is_superuser": cases == "superuser"})
+        response = client.post("/api/users", json=data, headers=headers)
 
-    assert response.status_code == status.HTTP_201_CREATED
-
-    created_user = response.json()
     db_user = User.get_by_email(db_session, email=data["email"])
 
-    assert db_user
-    data.pop("password")
-    for field in data.keys():
-        # check response and original data match
-        assert created_user[field] == data[field]
-        # check user in DB and original data match
-        assert getattr(db_user, field) == data[field]
+    if cases == "unauthenticated":
+        assert response.status_code == 401
+        assert not db_user
+    elif cases == "not_superuser":
+        assert response.status_code == 403
+        assert not db_user
+    else:
+        assert response.status_code == status.HTTP_201_CREATED
+        assert db_user
 
-    assert db_user.is_active
-    assert created_user.get("is_active")
+        created_user = response.json()
 
-    assert "time_created" in created_user
-    time_after = datetime.utcnow().replace(microsecond=0)
-    created_user_datetime = datetime.strptime(
-        created_user["time_created"], "%Y-%m-%dT%H:%M:%S"
-    )
+        data.pop("password")
+        for field in data.keys():
+            # check response and original data match
+            assert created_user[field] == data[field]
+            # check user in DB and original data match
+            assert getattr(db_user, field) == data[field]
 
-    assert db_user.time_created >= time_before and db_user.time_created <= time_after
-    assert created_user_datetime >= time_before and created_user_datetime <= time_after
+        assert db_user.is_active
+        assert created_user.get("is_active")
+
+        assert not db_user.is_superuser
+        assert not created_user.get("is_superuser")
+
+        assert "time_created" in created_user
+        time_after = datetime.utcnow().replace(microsecond=0)
+        created_user_datetime = datetime.strptime(
+            created_user["time_created"], "%Y-%m-%dT%H:%M:%S"
+        )
+
+        assert (
+            db_user.time_created >= time_before and db_user.time_created <= time_after
+        )
+        assert (
+            created_user_datetime >= time_before and created_user_datetime <= time_after
+        )
 
 
-def test_create_user_existing_email(client: TestClient, db_session: Session):
-    user = UserFactory.create()
+def test_create_user_existing_email(
+    client: TestClient,
+    db_session: Session,
+    auth_headers_superuser: tuple[dict[str, str], User],
+):
+    headers, user = auth_headers_superuser
 
     data = {"email": user.email, "password": "123456"}
-    response = client.post("/api/users", json=data)
+    response = client.post("/api/users", json=data, headers=headers)
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {"detail": "Email already registered"}

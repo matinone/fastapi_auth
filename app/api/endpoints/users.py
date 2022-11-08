@@ -18,6 +18,7 @@ def create_user(
     *,
     db: Session = Depends(dependencies.get_db),
     user_in: schemas.UserCreate,
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
 ):
     """
     Open endpoint to creat a new user. No need to be

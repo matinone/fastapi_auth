@@ -24,6 +24,7 @@ class UserUpdate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool = True
+    is_superuser: bool = False
     is_verified: bool = False
     time_created: datetime
 
