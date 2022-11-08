@@ -18,6 +18,7 @@ def create_user(
     *,
     db: Session = Depends(dependencies.get_db),
     user_in: schemas.UserCreate,
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
 ):
     """
     Open endpoint to creat a new user. No need to be
@@ -43,7 +44,7 @@ def create_user(
 )
 def read_users(
     db: Session = Depends(dependencies.get_db),
-    current_user: models.User = Depends(dependencies.get_current_active_user),
+    current_user: models.User = Depends(dependencies.get_current_active_superuser),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=0),
 ):
@@ -85,6 +86,10 @@ def read_user_by_id(
             detail="User not found",
         )
 
+    # only superuser can access other users information
+    if user.id != current_user.id and not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
     return user
 
 
@@ -122,8 +127,11 @@ def update_user_by_id(
             detail="User not found",
         )
 
-    user = models.User.update(db, current=user, new=update_data)
+    # only superuser can access other users information
+    if user.id != current_user.id and not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
+    user = models.User.update(db, current=user, new=update_data)
     return user
 
 
@@ -157,6 +165,10 @@ def delete_user_by_id(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
+
+    # only superuser can access other users information
+    if user.id != current_user.id and not current_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
 
     models.User.delete(db, user)
     # the body will be empty when using status code 204

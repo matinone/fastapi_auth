@@ -14,10 +14,13 @@ from app.tests.fixtures import mock_email  # noqa: F401
 def test_get_access_token_valid(
     client: TestClient,
     db_session: Session,
+    auth_headers: tuple[dict[str, str], User],
+    auth_headers_superuser: tuple[dict[str, str], User],
 ):
+    headers, user = auth_headers_superuser
     user_data = {"email": "test@test.com", "password": "123456"}
 
-    response = client.post("/api/users", json=user_data)
+    response = client.post("/api/users", json=user_data, headers=headers)
     assert response.status_code == status.HTTP_201_CREATED
 
     form_data = {"username": user_data["email"], "password": user_data["password"]}
@@ -36,10 +39,12 @@ def test_get_access_token_invalid(
     client: TestClient,
     db_session: Session,
     cases: str,
+    auth_headers_superuser: tuple[dict[str, str], User],
 ):
+    headers, user = auth_headers_superuser
     user_data = {"email": "test@test.com", "password": "123456"}
 
-    response = client.post("/api/users", json=user_data)
+    response = client.post("/api/users", json=user_data, headers=headers)
     assert response.status_code == status.HTTP_201_CREATED
 
     form_data = {"username": user_data["email"], "password": user_data["password"]}
@@ -61,9 +66,11 @@ def test_get_access_token_invalid(
 def test_get_refresh_token_valid(
     client: TestClient,
     db_session: Session,
+    auth_headers_superuser: tuple[dict[str, str], User],
 ):
+    headers, user = auth_headers_superuser
     user_data = {"email": "test@test.com", "password": "123456"}
-    response = client.post("/api/users", json=user_data)
+    response = client.post("/api/users", json=user_data, headers=headers)
     assert response.status_code == status.HTTP_201_CREATED
 
     form_data = {"username": user_data["email"], "password": user_data["password"]}
@@ -87,9 +94,11 @@ def test_get_refresh_token_invalid(
     client: TestClient,
     db_session: Session,
     cases: str,
+    auth_headers_superuser: tuple[dict[str, str], User],
 ):
+    headers, user = auth_headers_superuser
     user_data = {"email": "test@test.com", "password": "123456"}
-    response = client.post("/api/users", json=user_data)
+    response = client.post("/api/users", json=user_data, headers=headers)
     assert response.status_code == status.HTTP_201_CREATED
 
     form_data = {"username": user_data["email"], "password": user_data["password"]}

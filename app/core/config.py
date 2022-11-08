@@ -1,7 +1,7 @@
 import secrets
 from functools import lru_cache
 
-from pydantic import BaseSettings
+from pydantic import BaseSettings, EmailStr
 
 
 class Settings(BaseSettings):
@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 30
 
     SQLALCHEMY_DATABASE_URL: str = "sqlite:///./sql_dev.db"
+
+    SUPERUSER_EMAIL: EmailStr = "superuser@secretdomain.com"
+    SUPERUSER_PASSWORD: str = "secret_password"
 
     GOOGLE_CLIENT_ID: str = "dummy_id"
     GOOGLE_CLIENT_SECRET: str = "dummy_secret"

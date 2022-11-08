@@ -66,11 +66,23 @@ def client(db_session) -> TestClient:
 @pytest.fixture(scope="function")
 def auth_headers(db_session) -> tuple[dict[str, str], User]:
     """
-    Fixture to get valid authentication headers for a random user.
+    Fixture to get valid authentication headers for an example user.
     """
     user = UserFactory.create(email="user@example.com")
     auth_token = create_access_token(subject=user.id)
 
     headers = {"Authorization": f"Bearer {auth_token}"}
+    # return the user as well, in case the test needs it
+    return headers, user
+
+
+@pytest.fixture(scope="function")
+def auth_headers_superuser(db_session, auth_headers) -> tuple[dict[str, str], User]:
+    """
+    Fixture to get valid authentication headers for a superuser.
+    """
+    headers, user = auth_headers
+    User.update(db_session, user, new={"is_superuser": True})
+
     # return the user as well, in case the test needs it
     return headers, user

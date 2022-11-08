@@ -19,18 +19,26 @@ class User(Base, BaseCrudModel):
     full_name = Column(String)
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
+    is_superuser = Column(Boolean, default=False)
     is_verified = Column(Boolean, default=False)
     time_created = Column(DateTime(timezone=True), server_default=func.now())
 
     todos = relationship("ToDo", back_populates="user")
 
     @classmethod
-    def create(cls, db: Session, user_data: UserCreate, is_verified: bool = False):
+    def create(
+        cls,
+        db: Session,
+        user_data: UserCreate,
+        is_verified: bool = False,
+        is_superuser: bool = False,
+    ):
         new_user = User(
             email=user_data.email,
             full_name=user_data.full_name,
             hashed_password=get_password_hash(user_data.password),
             is_verified=is_verified,
+            is_superuser=is_superuser,
         )
         db.add(new_user)
         db.commit()
