@@ -18,5 +18,4 @@ def init_db():
             email=settings.SUPERUSER_EMAIL,
             password=settings.SUPERUSER_PASSWORD,
         )
-
         User.create(db_session, superuser_create, is_verified=True, is_superuser=True)

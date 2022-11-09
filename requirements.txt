@@ -15,3 +15,4 @@ Authlib==1.1.0
 httpx==0.23.0
 Jinja2==3.1.2
 yagmail==0.15.293
+psycopg2-binary==2.9.5

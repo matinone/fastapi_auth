@@ -6,7 +6,10 @@ from app.core.config import get_settings
 
 
 def create_engine_and_session(db_url):
-    engine = create_engine(db_url, connect_args={"check_same_thread": False})
+    if "sqlite" in db_url:
+        engine = create_engine(db_url, connect_args={"check_same_thread": False})
+    else:
+        engine = create_engine(db_url)
 
     # each instance of SessionLocal will be a database session
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -16,8 +19,6 @@ def create_engine_and_session(db_url):
 
 settings = get_settings()
 
-engine, SessionLocal = create_engine_and_session(
-    db_url=settings.SQLALCHEMY_DATABASE_URL
-)
+engine, SessionLocal = create_engine_and_session(db_url=settings.POSTGRES_DATABASE_URL)
 
 Base = declarative_base()
