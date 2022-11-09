@@ -15,7 +15,18 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 1 day
     PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 30
 
-    SQLALCHEMY_DATABASE_URL: str = "sqlite:///./sql_dev.db"
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_DB: str = "postgres"
+    POSTGRES_SERVER: str = "postgres"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_DATABASE_URL: str = (
+        f"postgresql+psycopg2://"
+        f"{POSTGRES_USER}:{POSTGRES_PASSWORD}"
+        f"@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
+    )
+
+    SQLITE_DATABASE_URL: str = "sqlite:///./sql_dev.db"
 
     SUPERUSER_EMAIL: EmailStr = "superuser@secretdomain.com"
     SUPERUSER_PASSWORD: str = "secret_password"
