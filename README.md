@@ -31,17 +31,18 @@ With or without Docker, the proper environment variables must be set before runn
 
 The following commands must be run from the top level directory.
 ### Without Docker
+Locally, the environment variable `ENVIRONMENT` must be set to `test`, to use SQLite instead of PostgreSQL.
 ```
 $ pip install -r requirements.txt
-$ uvicorn app.main:app
+$ ENVIRONMENT=test uvicorn app.main:app
 ```
 The server is now running at `http://127.0.0.1:8000`. The interactive API docs can be accessed from `http://127.0.0.1:8000/docs`.
 
 ### With Docker
 ```
-$ docker run -d --name fastapi_app -p 80:80 app_image
+$ docker compose up -d
 ```
-The server is now running at `http://127.0.0.1:80`. The interactive API docs can be accessed from `http://127.0.0.1:80/docs`.
+The server is now running at `http://127.0.0.1:80`. The interactive API docs can be accessed from `http://127.0.0.1:80/docs`. The pgAdmin platform can be accessed from  `http://127.0.0.1:5050`, using `email = pgadmin4@pgadmin.org` and `password = admin` to login (they are defined in the `docker-compose.yml` file).
 
 ## Running tests
 The following commands must be run from the top level directory.
