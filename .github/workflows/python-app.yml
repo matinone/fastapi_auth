@@ -31,4 +31,4 @@ jobs:
         flake8 app/
     - name: Test with pytest
       run: |
-        pytest app/ -v
+        pytest app/tests/ -v
