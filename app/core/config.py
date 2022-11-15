@@ -28,6 +28,8 @@ class Settings(BaseSettings):
 
     SQLITE_DATABASE_URL: str = "sqlite:///./sql_dev.db"
 
+    USE_ALEMBIC: bool = False
+
     SUPERUSER_EMAIL: EmailStr = "superuser@secretdomain.com"
     SUPERUSER_PASSWORD: str = "secret_password"
 
