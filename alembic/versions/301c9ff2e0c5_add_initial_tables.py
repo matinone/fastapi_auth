@@ -26,7 +26,7 @@ def upgrade() -> None:
     sa.Column('is_active', sa.Boolean(), nullable=True),
     sa.Column('is_superuser', sa.Boolean(), nullable=True),
     sa.Column('is_verified', sa.Boolean(), nullable=True),
-    sa.Column('time_created', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('time_created', sa.DateTime(timezone=True), server_default=sa.func.current_timestamp(), nullable=True),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_users'))
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
@@ -35,7 +35,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(), nullable=True),
     sa.Column('description', sa.String(), nullable=True),
-    sa.Column('time_created', sa.DateTime(timezone=True), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('time_created', sa.DateTime(timezone=True), server_default=sa.func.current_timestamp(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], name=op.f('fk_todos_user_id_users')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_todos'))
