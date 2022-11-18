@@ -23,7 +23,7 @@ class User(Base, BaseCrudModel):
     is_verified = Column(Boolean, default=False)
     time_created = Column(DateTime(timezone=True), server_default=func.now())
 
-    todos = relationship("ToDo", back_populates="user")
+    todos = relationship("ToDo", back_populates="user", cascade="delete, delete-orphan")
 
     @classmethod
     def create(
