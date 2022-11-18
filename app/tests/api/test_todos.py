@@ -26,11 +26,7 @@ def test_create_todo(
     elif todo_params == "no_desc":
         data.pop("description")
 
-    response = client.post(
-        "/api/todos",
-        json=data,
-        headers=headers,
-    )
+    response = client.post("/api/todos", json=data, headers=headers)
 
     if todo_params == "no_title":
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -91,10 +87,7 @@ def test_get_todos(
 
     ToDoFactory.create_batch(n_todos, user=user)
 
-    response = client.get(
-        "/api/todos",
-        headers=headers,
-    )
+    response = client.get("/api/todos", headers=headers)
 
     assert response.status_code == status.HTTP_200_OK
 
