@@ -41,3 +41,16 @@ def test_register_user_create_todo(client: TestClient):
     assert len(todos) == 1
     assert todos[0]["title"] == todo_data["title"]
     assert todos[0]["description"] == todo_data["description"]
+
+    # step 6: delete user
+    response = client.delete("/api/users/me", headers=auth_header)
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    # step 7: check token is no longer valid
+    response = client.get("/api/users/me", headers=auth_header)
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    # step 8: check it is not possible to get a new token
+    form_data = {"username": user_data["email"], "password": user_data["password"]}
+    response = client.post("api/token", data=form_data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
