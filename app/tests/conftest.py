@@ -1,3 +1,5 @@
+import os
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -25,7 +27,21 @@ def db_connection():
     """
     connection = test_engine.connect()
     yield connection
+
+    # get path to delete SQLite DB file
+    db_path = ""
+    for id_number, name, file_name in connection.execute("PRAGMA database_list"):
+        if name == "main" and file_name is not None:
+            db_path = file_name
+            break
+
     connection.close()
+
+    try:
+        print("Removing database file")
+        os.remove(db_path)
+    except FileNotFoundError:
+        print("Database file not found")
 
 
 @pytest.fixture(scope="function")

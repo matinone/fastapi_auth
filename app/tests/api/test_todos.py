@@ -26,11 +26,7 @@ def test_create_todo(
     elif todo_params == "no_desc":
         data.pop("description")
 
-    response = client.post(
-        "/api/todos",
-        json=data,
-        headers=headers,
-    )
+    response = client.post("/api/todos", json=data, headers=headers)
 
     if todo_params == "no_title":
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
@@ -91,10 +87,7 @@ def test_get_todos(
 
     ToDoFactory.create_batch(n_todos, user=user)
 
-    response = client.get(
-        "/api/todos",
-        headers=headers,
-    )
+    response = client.get("/api/todos", headers=headers)
 
     assert response.status_code == status.HTTP_200_OK
 
@@ -259,8 +252,6 @@ def test_delete_todo_by_id(
 ):
     headers, user = auth_headers
 
-    update_data = {"title": "Other Title", "description": "Other description"}
-
     if cases == "found":
         existing_todo = ToDoFactory.create(user=user)
         todo_id = existing_todo.id
@@ -273,7 +264,6 @@ def test_delete_todo_by_id(
 
     response = client.delete(
         f"/api/todos/{todo_id}",
-        json=update_data,
         headers=headers,
     )
 
@@ -289,3 +279,19 @@ def test_delete_todo_by_id(
     elif cases == "found":
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not db_todo
+
+
+def test_delete_user_deletes_todo(
+    client: TestClient,
+    db_session: Session,
+    auth_headers: tuple[dict[str, str], User],
+):
+    headers, user = auth_headers
+    existing_todo = ToDoFactory.create(user=user)
+    todo_id = existing_todo.id
+
+    response = client.delete("/api/users/me", headers=headers)
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
+    db_todo = ToDo.get_by_id(db_session, id=todo_id)
+    assert not db_todo
