@@ -1,0 +1,49 @@
+# Service to expose the FastAPI backend inside of the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  selector:
+    app: postgres-db
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+---
+# Deployment to create and handle the pods running
+# the FastAPI backend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: postgres-db
+    template:
+      metadata:
+        labels:
+          app: postgres-db
+      spec:
+        containers:
+          - name: postgres-cont
+            image: postgres:15-alpine
+            env:
+              - name: POSTGRES_USER
+                valueFrom:
+                  configMapKeyRef:
+                    name: fastapi-env
+                    key: POSTGRES_USER
+              - name: POSTGRES_PASSWORD
+                valueFrom:
+                  configMapKeyRef:
+                    name: fastapi-env
+                    key: POSTGRES_PASSWORD
+              - name: POSTGRES_DB
+                valueFrom:
+                  configMapKeyRef:
+                    name: fastapi-env
+                    key: POSTGRES_DB
