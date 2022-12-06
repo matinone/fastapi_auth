@@ -18,32 +18,32 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres-deployment
-  spec:
-    replicas: 1
-    selector:
-      matchLabels:
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-db
+  template:
+    metadata:
+      labels:
         app: postgres-db
-    template:
-      metadata:
-        labels:
-          app: postgres-db
-      spec:
-        containers:
-          - name: postgres-cont
-            image: postgres:15-alpine
-            env:
-              - name: POSTGRES_USER
-                valueFrom:
-                  configMapKeyRef:
-                    name: fastapi-env
-                    key: POSTGRES_USER
-              - name: POSTGRES_PASSWORD
-                valueFrom:
-                  configMapKeyRef:
-                    name: fastapi-env
-                    key: POSTGRES_PASSWORD
-              - name: POSTGRES_DB
-                valueFrom:
-                  configMapKeyRef:
-                    name: fastapi-env
-                    key: POSTGRES_DB
+    spec:
+      containers:
+        - name: postgres-db
+          image: postgres:15-alpine
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: fastapi-env
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: fastapi-env
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_SERVER
+              valueFrom:
+                configMapKeyRef:
+                  name: fastapi-env
+                  key: POSTGRES_SERVER

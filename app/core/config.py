@@ -20,11 +20,6 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "postgres"
     POSTGRES_SERVER: str = "postgres"
     POSTGRES_PORT: int = 5432
-    POSTGRES_DATABASE_URL: str = (
-        f"postgresql+psycopg2://"
-        f"{POSTGRES_USER}:{POSTGRES_PASSWORD}"
-        f"@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
-    )
 
     SQLITE_DATABASE_URL: str = "sqlite:///./sql_dev.db"
 
@@ -41,6 +36,13 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
+
+    def get_postgres_database_url(self) -> str:
+        return (
+            f"postgresql+psycopg2://"
+            f"{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        )
 
 
 @lru_cache()

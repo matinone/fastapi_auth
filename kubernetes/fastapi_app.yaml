@@ -18,23 +18,20 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fastapi-deployment
-  spec:
-    replicas: 1
-    selector:
-      matchLabels:
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-app
+  template:
+    metadata:
+      labels:
         app: fastapi-app
-    template:
-      metadata:
-        labels:
-          app: fastapi-app
-      spec:
-        containers:
-          - name: fastapi-cont
-            image: mbrignone/fastapi-app
-            imagePullPolicy: Always
-            env:
-              - name: USE_ALEMBIC
-                value: true
-            envFrom:
-              configRef:
+    spec:
+      containers:
+        - name: fastapi-cont
+          image: mbrignone/fastapi-app
+          imagePullPolicy: Always
+          envFrom:
+            - configMapRef:
                 name: fastapi-env

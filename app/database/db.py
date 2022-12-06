@@ -19,6 +19,8 @@ def create_engine_and_session(db_url):
 
 settings = get_settings()
 
-engine, SessionLocal = create_engine_and_session(db_url=settings.POSTGRES_DATABASE_URL)
+engine, SessionLocal = create_engine_and_session(
+    db_url=settings.get_postgres_database_url()
+)
 
 Base = declarative_base()
