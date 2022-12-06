@@ -63,6 +63,7 @@ $ kubectl apply -f=fastapi_app.yaml
 ```
 
 If all the resources are successfully created, then the command `$ minikube service fastapi-service` can be used to get the URL to access the app.
+
 Finally, the command `$ minikube delete --all` can be used to delete the whole cluster.
 
 ## Running tests
@@ -70,5 +71,5 @@ The following commands must be run from the top level directory.
 ```
 $ pip install -r requirements.txt
 $ pip install -r dev_requirements.txt
-$ python -m pytest -v --cov=app/api/
+$ python -m pytest app/tests/ -v --cov=app/api
 ```
