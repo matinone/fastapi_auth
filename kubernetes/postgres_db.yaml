@@ -1,0 +1,86 @@
+# Service to expose the FastAPI backend inside of the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+spec:
+  selector:
+    app: postgres-db
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+---
+# Deployment to create and handle the pods running
+# the FastAPI backend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-db
+  template:
+    metadata:
+      labels:
+        app: postgres-db
+    spec:
+      containers:
+        - name: postgres-db
+          image: postgres:15-alpine
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data/
+              name: postgres-volume
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: fastapi-env
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: fastapi-env
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_SERVER
+              valueFrom:
+                configMapKeyRef:
+                  name: fastapi-env
+                  key: POSTGRES_SERVER
+      volumes:
+        - name: postgres-volume
+          persistentVolumeClaim:
+            claimName: postgres-host-pvc
+---
+# Persistent Volume for the database data
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-host-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce   # running in minikube (single-node cluster)
+  hostPath:
+    path: /local/data/path
+    type: DirectoryOrCreate
+---
+# Persistent Volume Claim for the database data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-host-pvc
+spec:
+  volumeName: postgres-host-pv
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi

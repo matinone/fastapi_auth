@@ -20,7 +20,7 @@ if config.config_file_name is not None:
 
 settings = get_settings()
 if get_settings().ENVIRONMENT != "test":
-    config.set_main_option('sqlalchemy.url', settings.POSTGRES_DATABASE_URL)
+    config.set_main_option('sqlalchemy.url', settings.get_postgres_database_url())
 else:
     config.set_main_option('sqlalchemy.url', settings.SQLITE_DATABASE_URL)
 
