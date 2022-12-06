@@ -31,6 +31,9 @@ spec:
       containers:
         - name: postgres-db
           image: postgres:15-alpine
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data/
+              name: postgres-volume
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -47,3 +50,37 @@ spec:
                 configMapKeyRef:
                   name: fastapi-env
                   key: POSTGRES_SERVER
+      volumes:
+        - name: postgres-volume
+          persistentVolumeClaim:
+            claimName: postgres-host-pvc
+---
+# Persistent Volume for the database data
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-host-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce   # running in minikube (single-node cluster)
+  hostPath:
+    path: /local/data/path
+    type: DirectoryOrCreate
+---
+# Persistent Volume Claim for the database data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-host-pvc
+spec:
+  volumeName: postgres-host-pv
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  resources:
+    requests:
+      storage: 1Gi
