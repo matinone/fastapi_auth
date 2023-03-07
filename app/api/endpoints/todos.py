@@ -64,6 +64,7 @@ def read_todos(
     limit: int = Query(default=100, ge=0),
     start_datetime: datetime | None = None,
     end_datetime: datetime | None = None,
+    done: bool | None = None,
 ):
     return models.ToDo.get_multiple(
         db,
@@ -72,6 +73,7 @@ def read_todos(
         limit=limit,
         start_datetime=start_datetime,
         end_datetime=end_datetime,
+        done=done,
     )
 
 

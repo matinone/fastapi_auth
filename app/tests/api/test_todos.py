@@ -166,6 +166,39 @@ def test_get_todos_datetime(
         assert todo["time_created"] in expected_datetimes
 
 
+@pytest.mark.parametrize(
+    "done",
+    [True, False],
+    ids=["done", "not_done"],
+)
+def test_get_todos_done(
+    client: TestClient,
+    db_session: Session,
+    auth_headers: tuple[dict[str, str], User],
+    done,
+):
+    headers, user = auth_headers
+
+    done_todos = 5
+    not_done_todos = 7
+    ToDoFactory.create_batch(done_todos, user=user, done=True)
+    ToDoFactory.create_batch(not_done_todos, user=user, done=False)
+
+    response = client.get(f"/api/todos?done={done}", headers=headers)
+
+    assert response.status_code == status.HTTP_200_OK
+
+    todos = response.json()
+    assert len(todos) == (done_todos if done else not_done_todos)
+
+    for todo in todos:
+        assert "title" in todo
+        assert "description" in todo
+        assert "time_created" in todo
+        assert todo.get("user_id") == user.id
+        assert todo["done"] == done
+
+
 @pytest.mark.parametrize("cases", ["found", "not_found", "other_user"])
 def test_get_todo_by_id(
     client: TestClient,
