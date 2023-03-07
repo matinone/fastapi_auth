@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.sql import func
 
@@ -15,6 +15,8 @@ class ToDo(Base, BaseCrudModel):
     title = Column(String, index=True)
     description = Column(String)
     time_created = Column(DateTime(timezone=True), server_default=func.now())
+    done = Column(Boolean, default=False)
+    time_done = Column(DateTime(timezone=True))
     user_id = Column(Integer, ForeignKey("users.id"))
 
     user = relationship("User", back_populates="todos")

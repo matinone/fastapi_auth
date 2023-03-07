@@ -12,6 +12,8 @@ class ToDoFactory(factory.alchemy.SQLAlchemyModelFactory):
     title = factory.Faker("sentence")
     description = factory.Faker("paragraph")
     time_created = factory.LazyFunction(datetime.now)
+    done = False
+    time_done = None
 
     user = factory.SubFactory(UserFactory)
 

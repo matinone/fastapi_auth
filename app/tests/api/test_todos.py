@@ -41,6 +41,10 @@ def test_create_todo(
         assert created_todo["user_id"] == user.id
         assert created_todo["title"] == data["title"]
         assert db_todo.title == data["title"]
+        assert not created_todo["done"]
+        assert not db_todo.done
+        assert not created_todo["time_done"]
+        assert not db_todo.time_done
         if todo_params == "no_desc":
             assert not created_todo["description"]
             assert not db_todo.description
@@ -295,3 +299,29 @@ def test_delete_user_deletes_todo(
 
     db_todo = ToDo.get_by_id(db_session, id=todo_id)
     assert not db_todo
+
+
+def test_mark_as_done(
+    client: TestClient,
+    db_session: Session,
+    auth_headers: tuple[dict[str, str], User],
+):
+    headers, user = auth_headers
+
+    existing_todo = ToDoFactory.create(user=user)
+    todo_id = existing_todo.id
+
+    time_before = datetime.utcnow().replace(microsecond=0)
+    response = client.put(
+        f"/api/todos/{todo_id}/resolve",
+        headers=headers,
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    todo = response.json()
+    assert todo["id"] == todo_id
+    assert todo["done"]
+
+    done_datetime = datetime.strptime(todo["time_done"], "%Y-%m-%dT%H:%M:%S")
+    assert done_datetime >= time_before
