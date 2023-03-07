@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -63,6 +64,7 @@ def read_todos(
     limit: int = Query(default=100, ge=0),
     start_datetime: datetime | None = None,
     end_datetime: datetime | None = None,
+    done: bool | None = None,
 ):
     return models.ToDo.get_multiple(
         db,
@@ -71,6 +73,7 @@ def read_todos(
         limit=limit,
         start_datetime=start_datetime,
         end_datetime=end_datetime,
+        done=done,
     )
 
 
@@ -113,3 +116,21 @@ def delete_todo_by_id(
 ):
     models.ToDo.delete(db, todo)
     # the body will be empty when using status code 204
+
+
+@router.put(
+    "/{todo_id}/resolve",
+    response_model=schemas.ToDoOut,
+    summary="Mark a specific ToDo as done",
+    response_description="The done ToDo with the specified ID",
+)
+def mark_as_done(
+    todo: models.ToDo = Depends(get_todo_from_id),
+    db: Session = Depends(dependencies.get_db),
+):
+    update_data: dict[str, Any] = {
+        "done": True,
+        "time_done": datetime.utcnow().replace(microsecond=0),
+    }
+    todo = models.ToDo.update(db, current=todo, new=update_data)
+    return todo
