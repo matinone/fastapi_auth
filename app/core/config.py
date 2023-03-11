@@ -28,9 +28,6 @@ class Settings(BaseSettings):
     SUPERUSER_EMAIL: EmailStr = "superuser@secretdomain.com"
     SUPERUSER_PASSWORD: str = "secret_password"
 
-    GOOGLE_CLIENT_ID: str = "dummy_id"
-    GOOGLE_CLIENT_SECRET: str = "dummy_secret"
-
     EMAIL_ENABLED: bool = False
     EMAIL_SENDER: str = "noreply@gmail.com"
 

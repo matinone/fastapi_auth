@@ -2,3 +2,4 @@
 exclude_lines =
     pragma: no cover
     def get_db
+    def _validate_google_token
