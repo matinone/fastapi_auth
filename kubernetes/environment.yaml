@@ -3,16 +3,13 @@ kind: ConfigMap
 metadata:
   name: fastapi-env
 data:
-  ENVIRONMENT: 'dev'
+  ENVIRONMENT: "dev"
 
-  USE_ALEMBIC: 'true'
+  USE_ALEMBIC: "true"
 
   # all the next variables should be defined as Secrets
-  POSTGRES_USER: 'postgres'
-  POSTGRES_PASSWORD: 'postgres'
-  POSTGRES_DB: 'postgres'
-  POSTGRES_SERVER: 'postgres-service.default'
-  POSTGRES_PORT: '5432'
-
-  GOOGLE_CLIENT_ID: 'google_client_id'
-  GOOGLE_CLIENT_SECRET: 'google_client_secret'
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  POSTGRES_DB: "postgres"
+  POSTGRES_SERVER: "postgres-service.default"
+  POSTGRES_PORT: "5432"
